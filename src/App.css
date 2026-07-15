@@ -446,8 +446,8 @@ thead .sticky-col {
 
 .instance-cell {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
+  align-items: center;
+  gap: 8px;
 }
 
 .instance-label {
