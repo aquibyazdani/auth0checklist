@@ -138,6 +138,45 @@ function downloadJSON(data, filename) {
 }
 
 // ---------------------------------------------------------------------------
+// Icons — small inline SVGs, no external icon library
+// ---------------------------------------------------------------------------
+
+const Icon = {
+  grid: (props) => (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="3" width="7" height="7" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+      <rect x="14" y="14" width="7" height="7" rx="1.5" />
+    </svg>
+  ),
+  gear: (props) => (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="12" cy="12" r="3.2" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.04.04a2 2 0 1 1-2.83 2.83l-.04-.04a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.04.04a2 2 0 1 1-2.83-2.83l.04-.04A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.04-.04a2 2 0 1 1 2.83-2.83l.04.04A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.04-.04a2 2 0 1 1 2.83 2.83l-.04.04A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+    </svg>
+  ),
+  download: (props) => (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M12 3v12" />
+      <path d="M7 10l5 5 5-5" />
+      <path d="M4 19h16" />
+    </svg>
+  ),
+  arrowLeft: (props) => (
+    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M19 12H5" />
+      <path d="M11 18l-6-6 6-6" />
+    </svg>
+  ),
+  check: (props) => (
+    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M20 6L9 17l-5-5" />
+    </svg>
+  ),
+};
+
+// ---------------------------------------------------------------------------
 // App
 // ---------------------------------------------------------------------------
 
@@ -322,7 +361,7 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="app-shell">
+      <div className="app-layout">
         <div className="loading-state">Loading Auth0 Config Tracker…</div>
       </div>
     );
@@ -331,84 +370,118 @@ export default function App() {
   const selectedInstance = selectedKey ? allInstanceList.find((i) => i.key === selectedKey) : null;
 
   return (
-    <div className="app-shell">
-      <Header view={view} onNavigate={setView} onExport={handleExport} />
+    <div className="app-layout">
+      <Sidebar view={view} onNavigate={setView} />
 
-      {error && (
-        <div className="error-banner" role="alert">
-          <span>{error}</span>
-          <button className="btn-plain" onClick={() => setError('')}>
-            Dismiss
-          </button>
-        </div>
-      )}
+      <main className="main-content">
+        {error && (
+          <div className="error-banner" role="alert">
+            <span>{error}</span>
+            <button className="btn-plain" onClick={() => setError('')}>
+              Dismiss
+            </button>
+          </div>
+        )}
 
-      {view === 'dashboard' && (
-        <Dashboard
-          instanceList={allInstanceList}
-          instances={instances}
-          items={items}
-          apps={apps}
-          tenants={tenants}
-          envs={envs}
-          filters={filters}
-          setFilters={setFilters}
-          onSelectInstance={openDetail}
-        />
-      )}
+        {view === 'dashboard' && (
+          <Dashboard
+            instanceList={allInstanceList}
+            instances={instances}
+            items={items}
+            apps={apps}
+            tenants={tenants}
+            envs={envs}
+            filters={filters}
+            setFilters={setFilters}
+            onSelectInstance={openDetail}
+            onExport={handleExport}
+          />
+        )}
 
-      {view === 'detail' && selectedInstance && (
-        <DetailView
-          instance={selectedInstance}
-          items={items}
-          instanceState={instances[selectedInstance.key] || emptyInstanceState()}
-          onFieldChange={(itemId, field, value) => updateItemField(selectedInstance.key, itemId, field, value)}
-          onReset={() => resetInstance(selectedInstance.key)}
-          onBack={() => setView('dashboard')}
-        />
-      )}
+        {view === 'detail' && selectedInstance && (
+          <DetailView
+            instance={selectedInstance}
+            items={items}
+            instanceState={instances[selectedInstance.key] || emptyInstanceState()}
+            onFieldChange={(itemId, field, value) => updateItemField(selectedInstance.key, itemId, field, value)}
+            onReset={() => resetInstance(selectedInstance.key)}
+            onBack={() => setView('dashboard')}
+          />
+        )}
 
-      {view === 'settings' && (
-        <SettingsPanel
-          apps={apps}
-          tenants={tenants}
-          envs={envs}
-          items={items}
-          onAddDimension={addDimension}
-          onRemoveDimension={removeDimension}
-          onAddItem={addChecklistItem}
-          onEditItem={editChecklistItem}
-          onRemoveItem={removeChecklistItem}
-          onClose={() => setView('dashboard')}
-        />
-      )}
+        {view === 'settings' && (
+          <SettingsPanel
+            apps={apps}
+            tenants={tenants}
+            envs={envs}
+            items={items}
+            onAddDimension={addDimension}
+            onRemoveDimension={removeDimension}
+            onAddItem={addChecklistItem}
+            onEditItem={editChecklistItem}
+            onRemoveItem={removeChecklistItem}
+            onBack={() => setView('dashboard')}
+          />
+        )}
+      </main>
     </div>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Header
+// Sidebar
 // ---------------------------------------------------------------------------
 
-function Header({ view, onNavigate, onExport }) {
+function Sidebar({ view, onNavigate }) {
   return (
-    <header className="app-header">
-      <div className="app-title">
-        <h1>Auth0 Config Tracker</h1>
-        <p className="app-subtitle">Configuration checklist coverage across apps, tenants &amp; environments</p>
+    <aside className="sidebar">
+      <div className="sidebar-brand">
+        <span className="brand-mark">A0</span>
+        <div className="brand-text">
+          <div className="brand-title">Config Tracker</div>
+          <div className="brand-subtitle">Auth0 multi-tenant</div>
+        </div>
       </div>
-      <nav className="app-nav">
-        <button className={`nav-btn ${view === 'dashboard' ? 'active' : ''}`} onClick={() => onNavigate('dashboard')}>
+
+      <nav className="sidebar-nav">
+        <button className={`sidebar-link ${view === 'dashboard' ? 'active' : ''}`} onClick={() => onNavigate('dashboard')}>
+          <Icon.grid />
           Dashboard
         </button>
-        <button className={`nav-btn ${view === 'settings' ? 'active' : ''}`} onClick={() => onNavigate('settings')}>
+        <button className={`sidebar-link ${view === 'settings' ? 'active' : ''}`} onClick={() => onNavigate('settings')}>
+          <Icon.gear />
           Manage Config
         </button>
-        <button className="btn-primary" onClick={onExport}>
-          Export JSON
-        </button>
       </nav>
-    </header>
+
+      <div className="sidebar-footer">
+        <p>Apps × Tenants × Envs are tracked as instances. Add new ones any time from Manage Config.</p>
+      </div>
+    </aside>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Shared page header
+// ---------------------------------------------------------------------------
+
+function PageHeader({ title, subtitle, actions, onBack, backLabel }) {
+  return (
+    <div className="page-head">
+      {onBack && (
+        <button className="breadcrumb-back" onClick={onBack}>
+          <Icon.arrowLeft />
+          {backLabel || 'Back'}
+        </button>
+      )}
+      <div className="page-head-row">
+        <div>
+          <h1 className="page-title">{title}</h1>
+          {subtitle && <p className="page-subtitle">{subtitle}</p>}
+        </div>
+        {actions && <div className="page-head-actions">{actions}</div>}
+      </div>
+    </div>
   );
 }
 
@@ -416,7 +489,7 @@ function Header({ view, onNavigate, onExport }) {
 // Dashboard
 // ---------------------------------------------------------------------------
 
-function Dashboard({ instanceList, instances, items, apps, tenants, envs, filters, setFilters, onSelectInstance }) {
+function Dashboard({ instanceList, instances, items, apps, tenants, envs, filters, setFilters, onSelectInstance, onExport }) {
   const filtered = instanceList.filter((inst) => {
     if (filters.app !== 'all' && inst.app !== filters.app) return false;
     if (filters.tenant !== 'all' && inst.tenant !== filters.tenant) return false;
@@ -441,13 +514,27 @@ function Dashboard({ instanceList, instances, items, apps, tenants, envs, filter
   const verifiedCount = instanceList.filter(
     (inst) => getInstanceStatus(getInstanceStats(instances[inst.key], items)) === 'complete'
   ).length;
+  const inProgressCount = instanceList.filter(
+    (inst) => getInstanceStatus(getInstanceStats(instances[inst.key], items)) === 'in-progress'
+  ).length;
 
   const filtersActive = filters.app !== 'all' || filters.tenant !== 'all' || filters.env !== 'all' || filters.incompleteOnly;
 
   return (
     <div className="dashboard">
+      <PageHeader
+        title="Dashboard"
+        subtitle="Configuration checklist coverage across every app, tenant, and environment."
+        actions={
+          <button className="btn-primary" onClick={onExport}>
+            <Icon.download />
+            Export JSON
+          </button>
+        }
+      />
+
       <div className="summary-bar">
-        <div className="summary-stat">
+        <div className="summary-stat accent-teal">
           <span className="summary-value">{overallPercent}%</span>
           <span className="summary-label">Overall completion</span>
         </div>
@@ -455,9 +542,13 @@ function Dashboard({ instanceList, instances, items, apps, tenants, envs, filter
           <span className="summary-value">{instanceList.length}</span>
           <span className="summary-label">Instances tracked</span>
         </div>
-        <div className="summary-stat">
+        <div className="summary-stat accent-success">
           <span className="summary-value">{verifiedCount}</span>
           <span className="summary-label">Fully verified</span>
+        </div>
+        <div className="summary-stat accent-warning">
+          <span className="summary-value">{inProgressCount}</span>
+          <span className="summary-label">In progress</span>
         </div>
         <div className="summary-stat">
           <span className="summary-value">{items.length}</span>
@@ -517,71 +608,83 @@ function Dashboard({ instanceList, instances, items, apps, tenants, envs, filter
         )}
       </div>
 
-      <div className="grid-scroll">
-        <table className="grid-table">
-          <thead>
-            <tr>
-              <th className="sticky-col">Instance</th>
-              <th>Status</th>
-              {items.map((item) => (
-                <th key={item.id} title={item.label} className="item-col">
-                  {item.label}
-                </th>
-              ))}
-              <th>Completion</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.length === 0 && (
+      <div className="grid-card">
+        <div className="grid-scroll">
+          <table className="grid-table">
+            <thead>
               <tr>
-                <td colSpan={items.length + 3} className="empty-row">
-                  No instances match the current filters.
-                </td>
+                <th className="sticky-col">Instance</th>
+                <th>Status</th>
+                {items.map((item, idx) => (
+                  <th key={item.id} title={item.label} className="item-col">
+                    {idx + 1}
+                  </th>
+                ))}
+                <th>Completion</th>
               </tr>
-            )}
-            {filtered.map((inst) => {
-              const state = instances[inst.key];
-              const stats = getInstanceStats(state, items);
-              const status = getInstanceStatus(stats);
-              return (
-                <tr key={inst.key} className="grid-row" onClick={() => onSelectInstance(inst.key)}>
-                  <td className="sticky-col instance-cell">
-                    <span className="instance-label">{inst.app}</span>
-                    <span className="instance-meta">
-                      {inst.tenant} / {inst.env}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`status-pill status-${status}`}>{STATUS_LABEL[status]}</span>
-                  </td>
-                  {items.map((item) => {
-                    const itemState = state?.items?.[item.id];
-                    return (
-                      <td key={item.id} className="cell-status" title={itemState?.note || ''}>
-                        {itemState?.checked ? (
-                          <span className="cell-check" aria-label="checked">
-                            ✓
-                          </span>
-                        ) : (
-                          <span className="cell-empty" aria-label="unchecked">
-                            –
-                          </span>
-                        )}
-                      </td>
-                    );
-                  })}
-                  <td className="cell-percent">
-                    <div className="percent-bar-wrap">
-                      <div className="percent-bar" style={{ width: `${stats.percent}%` }} />
-                    </div>
-                    <span>{stats.percent}%</span>
+            </thead>
+            <tbody>
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={items.length + 3} className="empty-row">
+                    No instances match the current filters.
                   </td>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              )}
+              {filtered.map((inst) => {
+                const state = instances[inst.key];
+                const stats = getInstanceStats(state, items);
+                const status = getInstanceStatus(stats);
+                return (
+                  <tr key={inst.key} className="grid-row" onClick={() => onSelectInstance(inst.key)}>
+                    <td className="sticky-col instance-cell">
+                      <span className="instance-label">{inst.app}</span>
+                      <span className="instance-badges">
+                        <span className="tag">{inst.tenant}</span>
+                        <span className="tag tag-env">{inst.env}</span>
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`status-pill status-${status}`}>{STATUS_LABEL[status]}</span>
+                    </td>
+                    {items.map((item) => {
+                      const itemState = state?.items?.[item.id];
+                      const checked = !!itemState?.checked;
+                      return (
+                        <td key={item.id} className="cell-status" title={`${item.label}${itemState?.note ? ` — ${itemState.note}` : ''}`}>
+                          <span className={`status-dot ${checked ? 'status-dot-on' : ''}`}>
+                            {checked && <Icon.check />}
+                          </span>
+                        </td>
+                      );
+                    })}
+                    <td className="cell-percent">
+                      <div className="percent-bar-wrap">
+                        <div className="percent-bar" style={{ width: `${stats.percent}%` }} />
+                      </div>
+                      <span className="percent-text-sm">{stats.percent}%</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      {items.length > 0 && (
+        <div className="legend-card">
+          <h3>Checklist item key</h3>
+          <ol className="legend-list">
+            {items.map((item, idx) => (
+              <li key={item.id}>
+                <span className="legend-num">{idx + 1}</span>
+                {item.label}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
     </div>
   );
 }
@@ -597,26 +700,24 @@ function DetailView({ instance, items, instanceState, onFieldChange, onReset, on
 
   return (
     <div className="detail-view">
-      <button className="btn-plain back-link" onClick={onBack}>
-        ← Back to dashboard
-      </button>
-
-      <div className="detail-header">
-        <div>
-          <h2>
-            {instance.app} / {instance.tenant} / {instance.env}
-          </h2>
-          <span className={`status-pill status-${status}`}>{STATUS_LABEL[status]}</span>
-        </div>
-        <div className="detail-header-right">
+      <PageHeader
+        onBack={onBack}
+        backLabel="Dashboard"
+        title={`${instance.app} / ${instance.tenant} / ${instance.env}`}
+        subtitle={
+          <>
+            <span className={`status-pill status-${status}`}>{STATUS_LABEL[status]}</span>
+            <span className="detail-progress-text">
+              {stats.checked} of {stats.total} items verified ({stats.percent}%)
+            </span>
+          </>
+        }
+        actions={
           <div className="percent-bar-wrap large">
             <div className="percent-bar" style={{ width: `${stats.percent}%` }} />
           </div>
-          <span className="percent-text">
-            {stats.checked} / {stats.total} verified ({stats.percent}%)
-          </span>
-        </div>
-      </div>
+        }
+      />
 
       {items.length === 0 && (
         <p className="empty-row">No checklist items configured yet. Add some from Manage Config.</p>
@@ -628,12 +729,15 @@ function DetailView({ instance, items, instanceState, onFieldChange, onReset, on
           return (
             <div key={item.id} className={`checklist-item ${itemState.checked ? 'checked' : ''}`}>
               <label className="checklist-item-check">
+                <span className={`custom-checkbox ${itemState.checked ? 'on' : ''}`}>
+                  {itemState.checked && <Icon.check />}
+                </span>
                 <input
                   type="checkbox"
                   checked={!!itemState.checked}
                   onChange={(e) => onFieldChange(item.id, 'checked', e.target.checked)}
                 />
-                <span>{item.label}</span>
+                <span className="checklist-item-label">{item.label}</span>
               </label>
               <div className="checklist-item-fields">
                 <label className="field">
@@ -709,14 +813,11 @@ function SettingsPanel({
   onAddItem,
   onEditItem,
   onRemoveItem,
-  onClose,
+  onBack,
 }) {
   return (
     <div className="settings-view">
-      <button className="btn-plain back-link" onClick={onClose}>
-        ← Back to dashboard
-      </button>
-      <h2>Manage configuration</h2>
+      <PageHeader onBack={onBack} backLabel="Dashboard" title="Manage configuration" subtitle="Add apps, tenants, or environments, and edit the checklist items applied to every instance." />
 
       <div className="settings-grid">
         <DimensionEditor title="Apps" values={apps} onAdd={onAddDimension('app')} onRemove={onRemoveDimension('app')} placeholder="e.g. mycase" />
@@ -749,7 +850,7 @@ function DimensionEditor({ title, values, onAdd, onRemove, placeholder }) {
     setValue('');
   };
   return (
-    <div className="dimension-editor">
+    <div className="settings-card">
       <h3>{title}</h3>
       <ul className="dimension-list">
         {values.map((v) => (
@@ -796,11 +897,11 @@ function ChecklistItemEditor({ items, onAdd, onEdit, onRemove }) {
   };
 
   return (
-    <div className="checklist-item-editor">
+    <div className="settings-card checklist-item-editor">
       <h3>Checklist items</h3>
       <p className="settings-hint">These apply to every app × tenant × environment instance.</p>
       <ul className="item-list">
-        {items.map((item) => (
+        {items.map((item, idx) => (
           <li key={item.id}>
             {editingId === item.id ? (
               <form onSubmit={submitEdit} className="item-edit-form">
@@ -814,7 +915,10 @@ function ChecklistItemEditor({ items, onAdd, onEdit, onRemove }) {
               </form>
             ) : (
               <>
-                <span>{item.label}</span>
+                <span className="item-list-label">
+                  <span className="legend-num">{idx + 1}</span>
+                  {item.label}
+                </span>
                 <span className="item-actions">
                   <button className="btn-plain" onClick={() => startEdit(item)}>
                     Edit
